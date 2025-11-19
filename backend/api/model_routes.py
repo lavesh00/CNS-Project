@@ -6,7 +6,7 @@ from pydantic import BaseModel
 from typing import Optional, Dict
 import structlog
 
-from backend.models.manager import ModelManager
+from models.manager import ModelManager
 
 logger = structlog.get_logger()
 router = APIRouter()

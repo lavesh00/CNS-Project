@@ -1,0 +1,2 @@
+"""Git automation package"""
+

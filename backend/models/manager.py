@@ -194,6 +194,20 @@ class ModelManager:
         """Get list of installed models"""
         return list(self.installed_models.values())
     
+    def list_installed(self) -> List[Path]:
+        """List installed model file paths"""
+        installed_paths = []
+        
+        # Check all subdirectories in models_dir
+        if self.models_dir.exists():
+            for model_dir in self.models_dir.iterdir():
+                if model_dir.is_dir():
+                    # Look for .gguf files
+                    for model_file in model_dir.glob("*.gguf"):
+                        installed_paths.append(model_file)
+        
+        return installed_paths
+    
     def get_model_path(self, model_id: str) -> Optional[Path]:
         """Get path to installed model"""
         if model_id not in self.installed_models:

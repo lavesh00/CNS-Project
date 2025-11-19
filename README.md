@@ -234,12 +234,35 @@ We welcome contributions! Please see [CONTRIBUTING.md](docs/contributing.md) for
 
 ## 🗺️ Roadmap
 
+- [ ] VS Code extension with integrated panels
 - [ ] Multi-model support (use different models for different tasks)
 - [ ] Cloud sync (optional)
 - [ ] Team collaboration features
 - [ ] Voice input for prompts
 - [ ] Visual debugging interface
 - [ ] Plugin marketplace
+- [ ] Mobile app for monitoring
+
+## 📊 Project Status
+
+✅ **v1.0.0 Released** - Core functionality complete
+- Agentic loop (Planner/Worker/Summarizer)
+- Local model support
+- RAG system
+- Git/GitHub automation
+- Web scraping
+- MCP integration
+- Project templates
+
+🚧 **In Progress**
+- VS Code UI panels
+- Build system for distribution
+- Additional templates
+
+📋 **Planned**
+- Cloud model support (optional)
+- Team features
+- Plugin system
 
 ---
 

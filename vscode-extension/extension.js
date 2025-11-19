@@ -277,17 +277,50 @@ async function downloadModel(backendUrl) {
  */
 async function downloadModelById(backendUrl, modelId) {
     try {
-        vscode.window.showInformationMessage(`Downloading ${modelId}...`);
+        vscode.window.showInformationMessage(`Starting download: ${modelId}...`);
 
         const response = await axios.post(`${backendUrl}/models/download`, {
             model_id: modelId
         });
 
+        if (response.data.status === 'already_downloading') {
+            vscode.window.showWarningMessage(`${modelId} is already being downloaded`);
+            return;
+        }
+
         vscode.window.showInformationMessage(
-            `✅ Download started: ${modelId}. This may take several minutes.`
+            `✅ Download started: ${modelId}`
         );
+
+        // Start polling for progress
+        const progressInterval = setInterval(async () => {
+            try {
+                const statusResponse = await axios.get(`${backendUrl}/models/status/${modelId}`);
+                const status = statusResponse.data;
+                
+                statusBarItem.text = `$(sync~spin) Agent Lucky: Downloading ${modelId} (${status.progress}%)`;
+                
+                if (status.status === 'completed') {
+                    clearInterval(progressInterval);
+                    statusBarItem.text = '$(check) Agent Lucky: Ready';
+                    vscode.window.showInformationMessage(
+                        `✅ ${modelId} downloaded successfully!`
+                    );
+                } else if (status.status === 'error') {
+                    clearInterval(progressInterval);
+                    statusBarItem.text = '$(error) Agent Lucky: Download Failed';
+                    vscode.window.showErrorMessage(
+                        `❌ Download failed: ${status.message}`
+                    );
+                }
+            } catch (err) {
+                clearInterval(progressInterval);
+                logger.error('Error checking download status:', err);
+            }
+        }, 2000); // Check every 2 seconds
+
     } catch (error) {
-        vscode.window.showErrorMessage(`Failed to download model: ${error.message}`);
+        vscode.window.showErrorMessage(`Failed to start download: ${error.message}`);
     }
 }
 
@@ -380,11 +413,19 @@ function getWebviewContent(backendUrl) {
                 <div class="status-item"><strong>Backend:</strong> <span id="backend-status">Checking...</span></div>
                 <div class="status-item"><strong>Models:</strong> <span id="models-status">-</span></div>
                 <div class="status-item"><strong>Agent:</strong> <span id="agent-status">Idle</span></div>
+                <div class="status-item" id="download-status-container" style="display: none;">
+                    <strong>Download:</strong> <span id="download-status">-</span>
+                    <div style="background: var(--vscode-input-background); height: 20px; margin-top: 5px; border-radius: 3px; overflow: hidden;">
+                        <div id="progress-bar" style="background: var(--vscode-button-background); height: 100%; width: 0%; transition: width 0.3s;"></div>
+                    </div>
+                </div>
             </div>
         </div>
 
         <script>
             const vscode = acquireVsCodeApi();
+            const backendUrl = '${backendUrl}';
+            let downloadCheckInterval = null;
 
             function startAgent() {
                 const prompt = document.getElementById('prompt').value;
@@ -405,6 +446,38 @@ function getWebviewContent(backendUrl) {
                 vscode.postMessage({
                     command: 'checkStatus'
                 });
+                checkDownloads();
+            }
+
+            async function checkDownloads() {
+                try {
+                    const response = await fetch(backendUrl + '/models/downloads');
+                    const data = await response.json();
+                    
+                    if (data.downloads && Object.keys(data.downloads).length > 0) {
+                        const downloadContainer = document.getElementById('download-status-container');
+                        downloadContainer.style.display = 'block';
+                        
+                        // Show first active download
+                        const modelId = Object.keys(data.downloads)[0];
+                        const download = data.downloads[modelId];
+                        
+                        document.getElementById('download-status').textContent = 
+                            modelId + ': ' + download.message;
+                        document.getElementById('progress-bar').style.width = download.progress + '%';
+                        
+                        // Clear completed/error downloads after 5 seconds
+                        if (download.status === 'completed' || download.status === 'error') {
+                            setTimeout(() => {
+                                downloadContainer.style.display = 'none';
+                            }, 5000);
+                        }
+                    } else {
+                        document.getElementById('download-status-container').style.display = 'none';
+                    }
+                } catch (error) {
+                    console.error('Failed to check downloads:', error);
+                }
             }
 
             // Handle messages from extension
@@ -430,8 +503,9 @@ function getWebviewContent(backendUrl) {
                 }
             });
 
-            // Check status on load
+            // Check status on load and every 3 seconds
             setTimeout(checkStatus, 1000);
+            setInterval(checkDownloads, 3000);
         </script>
     </body>
     </html>`;

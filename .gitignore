@@ -48,12 +48,13 @@ vscode/extensions/**/out/
 Thumbs.db
 desktop.ini
 
-# Models and data
+# Models and data (weights only, not code)
 *.gguf
 *.bin
 *.safetensors
-models/
 .agent-lucky/
+# Allow backend/models Python package
+!backend/models/
 
 # Logs
 *.log

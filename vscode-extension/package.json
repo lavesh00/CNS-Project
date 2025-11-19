@@ -45,7 +45,7 @@
         {
           "id": "agent-lucky",
           "title": "Agent Lucky",
-          "icon": "resources/icon.svg"
+          "icon": "$(rocket)"
         }
       ]
     },

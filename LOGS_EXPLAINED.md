@@ -199,3 +199,4 @@ Just reload VS Code and start downloading models or creating projects!
 
 **Everything is working now!** 🍀
 
+

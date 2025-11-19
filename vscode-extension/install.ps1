@@ -52,3 +52,4 @@ Write-Host "Extension location: $targetDir`n" -ForegroundColor Gray
 
 pause
 
+

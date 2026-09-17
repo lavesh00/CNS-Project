@@ -1,5 +1,3 @@
-# Agent Lucky 🍀
-
 **A Production-Grade Agentic AI Coding System Built on VS Code**
 
 Agent Lucky is a Cursor-style AI coding assistant that transforms VS Code into a powerful agentic system capable of generating entire projects, fixing bugs, and managing codebases—all while running completely offline with local open-source models.
